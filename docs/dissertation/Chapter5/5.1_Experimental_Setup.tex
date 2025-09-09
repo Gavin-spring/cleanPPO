@@ -1,0 +1,124 @@
+% !TEX root = ../Dissertation.tex
+
+\section{Experimental Setup}
+\label{sec:experimental_setup}
+
+This section details the experimental framework designed to rigorously evaluate the performance of our proposed Proximal Policy Optimization (PPO) based framework. We outline the objectives, datasets, baseline algorithms, evaluation metrics, and the specific configuration of our model used for testing.
+
+\subsection{Objectives}
+The primary objectives of these experiments are twofold:
+\begin{enumerate}
+    \item To assess the \textbf{generalization performance} of our PPO-based model by training it exclusively on small-scale instances and testing it on a range of larger, unseen problem sizes.
+    \item To evaluate the \textbf{computational efficiency} and \textbf{solution quality} of our model in comparison to a comprehensive suite of benchmarks, including classical optimization algorithms, a commercial solver, and alternative neural network architectures.
+\end{enumerate}
+
+\subsection{Datasets}
+To ensure a robust and fair evaluation, three distinct primary datasets were procedurally generated for training, validation, and testing the generalization performance of the neural models. The parameters for these datasets are summarized in Table~\ref{tab:dataset_specs}.
+
+% --- TABLE HAS BEEN MODIFIED TO FIT PAGE WIDTH ---
+\begin{table}[htbp]
+    \centering
+    \caption{Specification of the Primary Datasets}
+    \label{tab:dataset_specs}
+    % Font size reduced slightly for a better fit
+    \footnotesize
+    \begin{tabular}{@{}lccc@{}}
+        \toprule
+        % The long header is now in a nested tabular to allow it to wrap
+        \textbf{Parameter} & \textbf{Training Set} & \textbf{Validation Set} & \begin{tabular}[c]{@{}c@{}}\textbf{Generalization} \\ \textbf{Test Set}\end{tabular} \\
+        \midrule
+        Item Count Range ($n$) & 5 to 50 & 5 to 50 & \textbf{50 to 200}\\
+        Step Size & 5 & 5 & 5  \\
+        Instances per Size & 100 & 30 & 50  \\
+        \addlinespace
+        \textbf{Total Instances} & \textbf{1,000} & \textbf{300} & \textbf{1,300} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+All generated instances across all datasets share a common set of properties.
+Item weights ($w_i$) and values ($v_i$) were sampled as integers from a uniform distribution $U[1, 100]$.
+There is no explicit correlation between an item's weight and its value.
+The knapsack capacity ($C$) for each instance was set relative to the sum of all its item weights ($\sum w_i$), with the capacity ratio randomly sampled from a uniform distribution $U[0.1, 0.9]$.
+**This range was chosen to ensure the generated problems are non-trivial; a capacity ratio below 0.1 would result in problems where very few items can be packed, while a ratio approaching 1.0 would allow nearly all items to be included, with both extremes lacking combinatorial difficulty and generality.
+** All input features are normalized before being passed to the neural network models, as detailed in Section 4.4.
+
+Furthermore, to empirically analyze the runtime of traditional algorithms on larger problems, a separate \textbf{Scalability Test Set} was generated. This dataset contains instances where the number of items $n$ ranges from 100 to 1000, with a step size of 5 and 10 instances generated per size, for a total of 1,810 instances. The item and capacity properties for this set are identical to those of the primary datasets.
+\subsection{Baseline Algorithms}
+To provide a thorough evaluation, our proposed PPO framework is benchmarked against three categories of solvers.
+
+\subsubsection{Optimal and Classical Solvers}
+These solvers represent traditional, non-learning-based approaches to the Knapsack Problem.
+\begin{itemize}
+    \item \textbf{Gurobi}: The Gurobi Optimizer is a state-of-the-art commercial solver. It is used in our experiments to provide the certified \textbf{optimal solution (ground-truth)} for each test instance, which is essential for calculating the Mean Relative Error of all other methods.
+    \item \textbf{Dynamic Programming (DP)}: We implemented the classic space-optimized 1D DP algorithm. Its theoretical time complexity is $O(nC)$, where $C$ is the knapsack capacity, making it pseudo-polynomial. For instances where capacity scales polynomially with $n$ (as in our test cases), this often results in an empirical runtime that grows polynomially with $n$.
+    \item \textbf{Branch and Bound (BnB)}: A standard BnB algorithm was implemented as another exact-method benchmark. While often faster than DP in practice on certain instance types, its worst-case time complexity is exponential.
+    \item \textbf{Greedy Heuristic}: A simple greedy algorithm that sorts items by value-to-weight ratio is included as a fast, low-complexity baseline.
+\end{itemize}
+The high computational cost of classical methods is a core motivation for this research. Figure~\ref{fig:complexity_growth} empirically demonstrates this limitation. On a log-log scale, the runtime of the DP and BnB algorithms grows polynomially, consistent with their theoretical complexity, and becomes prohibitively slow for large $n$. This validates the need for fast, scalable approximation methods like our proposed RL framework.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/knapsack_loglog.png}
+    \caption{Empirical runtime growth of classical algorithms on the Scalability Test Set ($n=100$ to $1000$). The log-log scale clearly shows the polynomial time complexity, with the 1D DP solver's growth aligning with an approximate $O(n^2)$ trend in this experimental setting.}
+    \label{fig:complexity_growth}
+\end{figure}
+
+\subsubsection{Neural Network Baselines}
+To position our work relative to other learning-based approaches, we compare it against two alternative neural architectures.
+\begin{itemize}
+    \item \textbf{Multi-Layer Perceptron (MLP)}: A standard MLP is trained to directly predict the solution vector. This baseline serves to demonstrate the limitations of simple function approximators that do not explicitly model the combinatorial and sequential nature of the problem.
+    \item \textbf{Pointer Network with REINFORCE (Ptr-Net)}: We implemented a Pointer Network based on the seminal work of Bello et al., trained with the REINFORCE algorithm. This model represents an important milestone in RL for combinatorial optimization and serves as a direct benchmark to showcase the superior training stability and performance of our PPO-based approach.
+\end{itemize}
+
+\subsection{Proposed Model Configuration}
+The model evaluated in this chapter is the final Transformer-PPO architecture detailed in Chapter 4. It utilizes the best-performing configuration identified during our research, which features a shared Transformer encoder and a simple MLP critic head. For complete architectural and hyperparameter details, please refer to Section 4.3 and Section 4.5.
+
+\subsection{Evaluation Metrics}
+The performance of all solvers is evaluated based on two primary metrics:
+\begin{itemize}
+    \item \textbf{Solution Quality}: Measured by the \textbf{Mean Relative Error (MRE)} against the optimal solutions from Gurobi. It is calculated as:
+    $$MRE = \frac{1}{N} \sum_{i=1}^{N} \frac{V_{\text{optimal}}^{(i)} - V_{\text{solver}}^{(i)}}{V_{\text{optimal}}^{(i)}}$$
+    where $V_{\text{solver}}^{(i)}$ is the value obtained by the evaluated solver for instance $i$, and $N$ is the total number of instances. A lower MRE indicates higher solution quality. An MRE of 0.3 corresponds to 70\% accuracy.
+    \item \textbf{Computational Efficiency}: Measured by the \textbf{Average Inference Time} in milliseconds, recorded for each solver to find a solution for a single problem instance.
+\end{itemize}
+
+\subsection{Inference Procedure and Decoding Strategy}
+\label{sec:inference_procedure}
+
+To generate a complete, sequential solution from the trained static policy network, we employ an autoregressive inference procedure that simulates the agent's interaction with the environment, as detailed in Algorithm~\ref{alg:instance_solver}. This instance-based solver operates in a closed loop: at each timestep $t$, the environment's current state $s_t$ is provided to the PPO model, which then predicts the next item to be selected, $a_t$. Subsequently, the environment updates its internal state to $s_{t+1}$ based on this action (e.g., by reducing the remaining capacity and masking the selected item). This decision-update cycle continues until no further items can be packed, thereby constructing the final solution. This step-by-step process ensures that each decision is conditioned on the most recent and valid state of the knapsack.
+
+For all reported experiments, we utilize a deterministic greedy decoding strategy \texttt{is\_deterministic=True}. This choice serves two primary objectives. First, it consistently evaluates the optimal policy learned by the agent by eliminating stochasticity, which ensures the reproducibility of our results. Second, through preliminary experiments, we determined that introducing stochastic sampling did not yield a significant improvement in solution quality (MRE) but substantially increased computation time. Therefore, to achieve an optimal balance between evaluation efficiency and performance, all results are based on deterministic greedy decoding.
+
+\begin{algorithm}[htbp]
+    \caption{Inference Procedure for the Instance-based Solver}
+    \label{alg:instance_solver}
+    \KwIn{Trained PPO Model $\pi_\theta$, Problem Instance $I$}
+    \KwOut{Final solution value $V_{\text{final}}$}
+    \BlankLine
+    Initialize environment with instance $I$\;
+    $s_0 \leftarrow \text{env.reset()}$\;
+    $done \leftarrow \text{False}$\;
+    \BlankLine
+    \While{not $done$}{
+        \tcp{Agent makes a decision based on the current state}
+        $s_t^{\text{norm}} \leftarrow \text{VecNormalize}(s_t)$\;
+        $a_t \leftarrow \pi_\theta(s_t^{\text{norm}})$ using greedy decoding\;
+        \BlankLine
+        \tcp{Environment transitions to the next state}
+        $(s_{t+1}, r_t, done, \text{info}) \leftarrow \text{env.step}(a_t)$\;
+        $s_t \leftarrow s_{t+1}$\;
+    }
+    \BlankLine
+    $V_{\text{final}} \leftarrow \text{info.get("total\_value")}$\;
+    \Return{$V_{\text{final}}$}\;
+\end{algorithm}
+
+\subsection{Hardware and Software Environment}
+All experiments were conducted on a consistent hardware platform to ensure fair comparison.
+\begin{itemize}
+    \item \textbf{CPU}: [12th Gen Intel(R) Core(TM) i5-12500H (16 CPUs), ~2.5GHz]
+    \item \textbf{GPU}: [NVIDIA GeForce RTX 2050]
+    \item \textbf{Memory}: [16 GB DDR5]
+    \item \textbf{Software}: Python 3.11.13, PyTorch 2.7.1, CUDA 12.6, Stable-Baselines3 2.7.0, Gurobi 12.0.2.
+\end{itemize}

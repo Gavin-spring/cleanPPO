@@ -1,0 +1,86 @@
+% !TEX root = ../Dissertation.tex
+\chapter{Related Work}
+\label{chap:related_work}
+
+While traditional algorithms such as Dynamic Programming provide the theoretical foundation for solving Combinatorial Optimization Problems (COPs), contemporary research has predominantly shifted towards Machine Learning (ML) methodologies to overcome their scalability limitations.
+Within the last decade, and especially in the last few years, Reinforcement Learning (RL) has emerged as the dominant paradigm for training agents to solve these problems, owing to its ability to learn effective heuristics through direct interaction with a problem environment.
+Following the effective taxonomy proposed in the survey by Wang et al. \cite{wangSolvingCombinatorialOptimization2024}, this chapter reviews the state-of-the-art by categorizing these DNN-based approaches into two main families: \textit{constructive} and \textit{improvement} methods.
+
+\section{Constructive Methods}
+Constructive methods build a solution from scratch, typically in a sequential, element-by-element manner.
+This paradigm is largely dominated by encoder-decoder architectures that learn to output a sequence or a set of items that form the final solution.
+In the context of the Knapsack Problem, researchers have explored various RL-based constructive methods. For instance, \textbf{Yildiz (2022)} compared the performance of fully connected, attention, and Transformer models within a Deep Q-Network (DQN) framework \cite{yildizReinforcementLearningUsing2022}. \textbf{Afshar et al. (2020)} introduced a state aggregation approach to mitigate the state-space explosion and combined it with the A2C algorithm \cite{afsharStateAggregationApproach2020}. Others have extended these methods to more complex variants like the Multi-Knapsack Problem (MKP) \cite{surDeepReinforcementLearningBased2022}.
+
+\subsection{Vanilla Pointer Networks}
+The initial application of neural networks to constructive solutions was marked by the Pointer Network (Ptr-Net), first proposed by Vinyals et al. to be trained with Supervised Learning (SL) on solution labels from existing solvers \cite{vinyalsPointerNetworks2017}.
+However, the reliance on expensive-to-generate optimal labels was a significant bottleneck. A major breakthrough came from \textbf{Bello et al. (2017)} \cite{belloNeuralCombinatorialOptimization2017}, who successfully trained a Ptr-Net using the REINFORCE algorithm with a critic baseline.
+This pivotal work demonstrated that an agent could learn to solve both the Traveling Salesman Problem (TSP) and the Knapsack Problem effectively without supervised data.
+Following this, \textbf{Nazari et al. (2018)} extended this RL-based Ptr-Net approach to handle problems with dynamic elements, such as the Capacitated Vehicle Routing Problem (CVRP) \cite{nazariReinforcementLearningSolving2018}.
+
+\subsection{Pointer Networks with Self-Attention}
+A crucial architectural evolution was the replacement of Recurrent Neural Network (RNN) based encoders with the Transformer architecture, which uses self-attention mechanisms to better capture the global context of the entire problem instance at once.
+Deudon et al. were among the first to apply this to COPs. A highly influential paper by \textbf{Kool et al. (2019)} \cite{koolAttentionLearnSolve2019a} solidified this trend with their "Attention Model". They paired a Transformer encoder with a more efficient "rollout baseline" for the REINFORCE algorithm, achieving state-of-the-art results on TSP and CVRP and setting a new benchmark for subsequent research.
+
+\subsection{Hierarchical Pointer Networks}
+To tackle large-scale COPs or those with complex constraints, researchers have developed hierarchical frameworks.
+These methods typically decompose a large problem into smaller, manageable subproblems, which are then solved by a neural model.
+For instance, Ma et al. presented a Graph Pointer Network within a hierarchical RL architecture to address TSP with time windows.
+Similarly, other works like Pan et al. have successfully applied hierarchical models to solve large-scale TSP (LSTSP), demonstrating a promising direction for scaling neural COP solvers \cite{wangSolvingCombinatorialOptimization2024}.
+
+\section{Improvement Methods}
+In contrast to constructive methods, improvement methods begin with a complete (often randomly or greedily generated) solution and iteratively refine it.
+This is typically achieved by learning a policy that guides a local search or other heuristic optimization process.
+
+\subsection{Local Search Based on Neural Networks}
+This class of methods trains a neural network to act as a sophisticated operator within a local search framework.
+The network learns to identify which parts of a current solution are most promising to modify.
+Chen and Tian developed the "NeuRewriter" framework, where a Ptr-Net trained with an Actor-Critic algorithm learns to select both a rewrite rule and a region of the solution to apply it to, showing strong results on Job Shop Scheduling (JSP) and CVRP.
+More recently, architectures have shifted towards Transformers. For example, Ma et al. proposed the Dual-Aspect Collaborative Transformer (DACT) and used \textbf{PPO} to train a policy that improves CVRP solutions iteratively \cite{wangSolvingCombinatorialOptimization2024}.
+
+\subsection{Heuristics Assisted by Neural Networks}
+Another effective improvement strategy is to use a DNN to enhance a critical component of a powerful traditional heuristic.
+The Lin-Kernighan-Helsgaun (LKH) algorithm is one of the most effective traditional heuristics for the TSP. Recognizing this, Xin et al. proposed NeuroLKH, which uses a Graph Convolutional Network (GCN) to predict a promising set of candidate edges.
+This learned knowledge is then used to guide and prune the search space of the LKH algorithm, achieving remarkable performance by combining the strengths of both deep learning and classical heuristics \cite{wangSolvingCombinatorialOptimization2024}. Beyond assisting traditional heuristics, researchers have also explored hybrid approaches, such as combining RL with scatter search \cite{zhaoReinforcementLearningdrivenCooperative2024} or with Constraint Programming (CP) to leverage their respective strengths \cite{cappartCombiningReinforcementLearning2021}.
+
+\section{The Rise of Proximal Policy Optimization}
+The training stability of early policy gradient methods like REINFORCE was a significant challenge, as they are known to suffer from high variance in gradient estimates, leading to inefficient learning.
+A landmark development in this area was the introduction of the Proximal Policy Optimization (PPO) algorithm by \textbf{Schulman et al. (2017)} \cite{schulmanProximalPolicyOptimization2017}. PPO stabilizes the training process by optimizing a "clipped surrogate objective" function, which discourages the policy from changing too drastically in a single update.
+This provides the reliability of more complex trust-region methods but with a much simpler implementation, striking a favorable balance between sample complexity, simplicity, and performance.
+Due to its robustness, PPO has become a go-to algorithm in the RL community and has been successfully applied to COPs.
+For example, \textbf{Gholipour et al. (2023)} \cite{gholipourTPTOTransformerPPOBased2023} leveraged a Transformer-PPO architecture to effectively solve the task offloading problem in edge computing. Similarly, \textbf{Que et al. (2023)} also successfully combined a Transformer with PPO to tackle the 3D Packing Problem, further demonstrating the power of this algorithmic combination \cite{queSolving3DPacking2023}.
+
+\section{Positioning the Present Work}
+This dissertation situates itself within the modern, end-to-end constructive paradigm while leveraging state-of-the-art advancements in RL algorithms.
+The proposed framework is built upon the following foundations:
+\begin{itemize}
+    \item It follows the \textbf{constructive, reinforcement learning} approach pioneered by Bello et al. \cite{belloNeuralCombinatorialOptimization2017}, learning a policy from scratch without reliance on supervised labels.
+    \item It adopts a \textbf{Transformer-based encoder}, in line with the current state-of-the-art for capturing complex, non-sequential relationships in combinatorial problems, following the success of models like that of Kool et al. \cite{koolAttentionLearnSolve2019a}.
+    \item It employs the \textbf{Proximal Policy Optimization (PPO)} algorithm for its proven training stability and high performance, as established by Schulman et al. \cite{schulmanProximalPolicyOptimization2017}.
+\end{itemize}
+
+While many advanced DRL applications have focused on routing problems like TSP and CVRP, this work applies the powerful Transformer-PPO architecture specifically to the 0-1 Knapsack Problem with a strong emphasis on \textbf{generalization} from small to large-scale instances.
+This addresses a critical gap, as many prior works were confined to fixed problem sizes \cite{belloNeuralCombinatorialOptimization2017}.
+Recent related studies, such as that by \textbf{Zhang et al. (2025)} \cite{zhangReinforcementLearningSolving2025}, have also tackled the KP with RL but have explored different avenues, such as value-based Dueling DQN combined with state representation normalization and Noisy layers for exploration.
+Our focus on a state-of-the-art policy gradient method contributes a valuable perspective to the ongoing effort to develop scalable and generalizable solvers for this fundamental combinatorial optimization problem.
+
+\begin{table}[H]
+    \centering
+    \caption{Summary of Key Related Works in Learning-based COPs}
+    \label{tab:related_work_summary}
+    \small
+    \begin{tabular}{@{}lllll@{}}
+        \toprule
+        \textbf{Work} & \textbf{Model / Architecture} & \textbf{Method} & \textbf{Generalization} \\
+        \midrule
+        Bello et al. \cite{belloNeuralCombinatorialOptimization2017} & Ptr-Net + RNN & REINFORCE & To fixed size\\
+        Kool et al. \cite{koolAttentionLearnSolve2019a} & Transformer & REINFORCE& Improved but focused \\
+        Gholipour et al. \cite{gholipourTPTOTransformerPPOBased2023} & Transformer & PPO & Problem-specific \\
+        Zhang et al. \cite{zhangReinforcementLearningSolving2025} & Transformer & Dueling DQN & To fixed size \\
+        \midrule
+        \textbf{This Work} & 
+        \begin{tabular}[c]{@{}c@{}}{Transformer +} \\ {Ptr-Net Decoder}\end{tabular} & 
+        \begin{tabular}[c]{@{}c@{}}{RL (PPO)} \\ {+ MLP Critic}\end{tabular} & 
+        \begin{tabular}[c]{@{}c@{}}{End-to-end} \\ {+ Generalization}\end{tabular} &  \\
+        \bottomrule
+    \end{tabular}
+\end{table}

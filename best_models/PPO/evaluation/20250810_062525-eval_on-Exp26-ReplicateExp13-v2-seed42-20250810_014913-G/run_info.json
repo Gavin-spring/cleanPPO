@@ -1,0 +1,11 @@
+{
+    "eval_run_name": "20250810_062525-eval_on-Exp27-ReplicateExp13-v2-seed42-20250810_014913-G",
+    "training_run_name": "Exp27-ReplicateExp13-v2-seed42-20250810_014913",
+    "is_deterministic": true,
+    "data_range": "50",
+    "batch_size": 64,
+    "n_samples": 10,
+    "data_path": "/home/gavin/projects/Mine/data/small_testing",
+    "model_path": "artifacts_sb3/training/Exp27-ReplicateExp13-v2-seed42-20250810_014913/models/best_model.zip",
+    "stats_path": "artifacts_sb3/training/Exp27-ReplicateExp13-v2-seed42-20250810_014913/models/vec_normalize.pkl"
+}

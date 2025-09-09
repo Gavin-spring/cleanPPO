@@ -1,0 +1,191 @@
+# configs/config.yaml
+# Centralized configuration for the entire project.
+
+# 1. Path Management
+# Note: These are relative paths from the project root. The config loader
+# will build the absolute paths dynamically at runtime.
+paths:
+  sources: src
+  configs: configs
+  data: data
+  artifacts: artifacts
+  # Subdirectories for artifacts
+  models: artifacts/models
+  plots: artifacts/plots
+  logs: artifacts/logs
+  results: artifacts/results
+  # Subdirectories for data
+  data_training: data/small_training
+  data_validation: data/small_validation
+  data_testing: data/small_testing
+
+# 2. TESTING Data Generation Config
+data_gen:
+  # See src/utils/generator.py for correlation options.
+  # e.g., 'uncorrelated', 'weakly_correlated', 'strongly_correlated', 'subset_sum'
+  correlation_type: 'uncorrelated'
+  # Defines problem sizes for the 0-1 knapsack problem, mainly for TESTING: (start_n, stop_n, step).
+  # The number of instances generated per size is defined in generate_data.py.
+  n_range: [5, 800, 10] # slightly larger than the DNN training set to test extrapolation
+  max_weight: 100
+  max_value: 100
+  capacity_ratio: 0.5
+  capacity_ratio_range: [0.1, 0.9]
+
+# 3. Classic Solvers Config
+classic_solvers:
+  # List of non-ML solvers to be used by evaluate_solvers.py.
+  # Names must match keys in ALGORITHM_REGISTRY in config_loader.py.
+  algorithms_to_test:
+    - "Gurobi"
+    - "2D DP"
+    - "1D DP (Optimized)"
+    - "FPTAS"
+    - "Branch and Bound"
+    - "Greedy"
+
+# 4. Machine Learning Config
+ml:
+  training_mode: "actor_critic"  # "dnn", "reinforce", "actor_critic" used in train_model.py; use train_sb3.py for PPO.
+  device: "auto"  # "auto" will be resolved to 'cuda' if available, otherwise 'cpu'.
+  baseline_algorithm: "Gurobi"
+  approximation_solvers:
+    "DNN": "dnn"
+    "PointerNet RL": "rl"
+    "PPO": "ppo"
+  testing: # For unified testing of all ML solvers.
+    is_deterministic: true
+    batch_size: 64
+    data_range: "50"
+    n_samples: 10
+
+  # Settings for generating the ML-specific training/validation datasets.
+  # MAX_N, input_size, target_scale are dynamically generated in config loader.
+  generation:
+    start_n: 5
+    end_n: 50 # This is max_n
+    step_n: 5
+    max_weight: 100
+    max_value: 100
+    capacity_ratio: 0.5
+    capacity_ratio_range: [0.1, 0.9]
+    correlation_type: 'uncorrelated'
+
+  dnn:
+    # Model architecture and normalization hyperparameters.
+    hyperparams:
+      max_n_for_architecture: 800 # update to match the max testing size
+      max_weight_norm: 100 # same as max_weight in dnn
+      max_value_norm: 100 # same as max_value in dnn      
+      input_size_factor: 5 # input_size = MAX_N * input_size_factor + input_size_plus
+      input_size_plus: 1
+      target_scale_factor_multiplier: 1.0 # target_scale = MAX_N * max_value * this_multiplier
+
+    # Training loop settings.
+    training:
+      total_epochs: 800 # Total number of epochs to train on the entire pooled dataset.
+      epochs_per_n: 10 # This is for curriculum learning and is not used by Pooled Data Training
+      batch_size: 32
+      learning_rate: 0.001
+      weight_decay: 0.001
+
+  rl:
+    # ==========================================================
+    # 方案一：基于 REINFORCE (Monte Carlo) + EMA Baseline
+    # ==========================================================
+    reinforce:
+      # --- 模型架构超参数 (LSTM + PointerNet) ---
+      hyperparams:
+        embedding_dim: 96
+        hidden_dim: 96      # LSTM 隐藏层维度
+        n_glimpses: 2
+        tanh_exploration: 30 # Tanh 探索因子 C
+        use_tanh: true       # 是否在注意力中使用tanh
+
+      # --- 训练循环参数 ---
+      training:
+        algorithm_mode: "reinforce"
+        total_epochs: 300
+        batch_size: 32
+        learning_rate: 0.0001
+        lr_decay_step: 500
+        lr_decay_rate: 0.96
+        max_grad_norm: 2.0
+        baseline_beta: 0.8     # EMA 基线的beta系数
+
+    # ==========================================================
+    # 方案二：基于 REINFORCE (Monte Carlo) + Critic Baseline
+    # ==========================================================
+    actor_critic:
+      hyperparams:
+        embedding_dim: 96
+        hidden_dim: 96       # LSTM 隐藏层维度
+        n_glimpses: 2
+        tanh_exploration: 30 # Tanh 探索因子 C
+        use_tanh: true       # 是否在注意力中使用tanh
+      training:
+        algorithm_mode: "actor_critic"
+        total_epochs: 300
+        batch_size: 32
+        learning_rate: 0.0001
+        lr_decay_step: 500
+        lr_decay_rate: 0.96
+        # PPO 相关的参数
+        ppo_epochs: 4
+        clip_param: 0.2
+        value_loss_coef: 0.5
+        entropy_coef: 0.01
+        n_steps: 2048
+        gamma: 0.99
+        gae_lambda: 0.95
+        max_grad_norm: 2.0
+
+    # ==========================================================
+    # 方案三：基于 gym + stable-baselines3 的 PPO 版本
+    # ==========================================================
+    ppo:
+      # --- 模型架构超参数 (新的Transformer + PointerNet) ---
+      hyperparams:
+        model_description: "Shared Encoder + MLP"
+        exp_description: "Exp25: Replicate Exp13, same params"
+        architecture:
+          critic_description: "MLP with bn and dropout"
+          critic_type: "simple"  # 可选: "simple" 或 "advanced"
+          critic_input_context: False # 可选: True 或 False (当critic_type为advanced时才有效)
+          use_cls_token: False      # 可选: True 或 False
+        data_range: "10~50"
+        data_type: "unfixed"     # "fixed" for fixed-size, "unfixed" for variable size
+        use_shaping_reward: False
+        VecNormalize:
+          obs: True
+          reward: True
+        max_n: 50              # 训练时最大问题规模
+        eval_max_n: 500        # 大于测试时最大问题规模 (用于位置编码)
+        item_feature_dim: 2    # 每个物品的特征维度 (weight, value)
+        embedding_dim: 128
+        n_glimpses: 2          # Actor (PointerDecoder) 的 Glimpse 次数
+        nhead: 4               # Encoder (Transformer) 的多头注意力头数
+        num_layers: 2          # Encoder (Transformer) 的层数
+        n_process_block_iters: 3 # Attention blocks in CriticNetwork
+
+      # --- 训练流程与PPO算法超参数 ---
+      training:
+        # 训练流程控制
+        total_timesteps: 2500000
+        eval_freq: 2500
+        early_stopping_patience: 10
+
+        # 学习率调度
+        learning_rate_initial: 0.00001
+        learning_rate_final: 0.000001
+
+        # PPO 核心参数 (与SB3完全对应)
+        n_steps: 2048
+        batch_size: 64
+        n_epochs: 10
+        gamma: 0.99
+        gae_lambda: 0.95
+        clip_range: 0.2
+        vf_coef: 1.0
+        ent_coef: 0
+        max_grad_norm: 2.0

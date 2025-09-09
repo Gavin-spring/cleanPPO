@@ -1,0 +1,100 @@
+% !TEX root = ../Dissertation.tex
+\section{What is Dynamic Programming?}
+\label{sec:dp}
+
+Dynamic Programming (DP) is a classical method for solving complex optimization problems by breaking them down into simpler, overlapping subproblems.
+As an exact algorithm, DP guarantees finding the optimal solution.
+For the 0/1 Knapsack Problem, DP is not only a cornerstone of traditional computer science but also provides the theoretical bedrock for virtually all modern reinforcement learning approaches.
+The core principle connecting them is the Bellman equation, which is fundamental to both methodologies \cite{reyes-aldasoroHybridModelBased1999}.
+DP can be implemented in two primary ways:
+
+\begin{itemize}
+    \item \textbf{Tabulation (Bottom-up):} This approach systematically solves every subproblem, starting from the smallest ones, and stores the results in a table (or a multi-dimensional array).
+It then builds upon these stored results to solve larger and more complex subproblems until the final solution is reached.
+This method is exhaustive as it computes the value for every possible state.
+\item \textbf{Memoization (Top-down):} This approach is a recursive method that solves the main problem by breaking it down.
+However, it stores the result of each computed subproblem in a lookup table.
+Before computing a subproblem, it first checks if the result is already stored.
+If it is, the stored result is reused; otherwise, the subproblem is computed and its result is stored for future use.
+This way, it only computes the states that are actually reached during the recursive calls.
+\end{itemize}
+
+\subsection{The State-Transition Equation}
+
+For the 0/1 Knapsack Problem, the DP approach relies on defining a state and a value function.
+Let \(V(i, w)\) be the maximum value that can be obtained using a subset of the first \(i\) items with a knapsack capacity of \(w\).
+The state-transition equation, or DP recurrence, is defined as follows:
+
+\begin{equation}
+\label{eq:dp_recurrence}
+V(i, w) = 
+\begin{cases} 
+V(i-1, w) & \text{if } w_i > w \\
+\max(V(i-1, w), v_i + V(i-1, w - w_i)) & \text{if } w_i \leq w 
+\end{cases}
+\end{equation}
+
+The first case corresponds to the decision of not including item \(i\) (as it exceeds the current capacity \(w\)), so the optimal value is the same as the one obtained with \(i-1\) items.
+The second case represents the core decision: we take the maximum of either excluding item \(i\) (the value remains \(V(i-1, w)\)) or including it (the value is \(v_i\) plus the optimal value achievable with \(i-1\) items and the remaining capacity \(w - w_i\)).
+This recurrence is directly analogous to the Bellman equation, which is central to reinforcement learning:
+\begin{equation}
+\label{eq:bellman}
+V^{\pi}(s) = \mathbb{E}_{\pi} [R_{t+1} + \gamma V^{\pi}(S_{t+1}) | S_t = s]
+\end{equation}
+
+The principles are identical: the value of a state is determined by the immediate reward plus the value of the subsequent state(s).
+In the context of a deterministic, model-based problem like the Knapsack Problem, the DP recurrence (Equation~\ref{eq:dp_recurrence}) is an exact, specific instance of the Bellman equation (Equation~\ref{eq:bellman}).
+The key distinction is that the Bellman equation provides a more general framework that can be extended to model-free scenarios where the state-transition probabilities are unknown and must be learned.
+
+\subsection{Complexity and Limitations}
+
+Despite its optimality, the standard DP approach for the knapsack problem has significant drawbacks that limit its applicability to large-scale instances:
+
+\begin{itemize}
+    \item \textbf{High Complexity:} Both the tabulation and memoization methods suffer from high computational complexity.
+The time and space complexity are both \(O(nW)\), where \(n\) is the number of items and \(W\) is the knapsack capacity.
+This leads to slow execution times and the risk of memory explosion when \(W\) is exponentially large relative to the input size.
+\item \textbf{Pseudo-Polynomial Time:} The \(O(nW)\) complexity is considered pseudo-polynomial because the runtime depends on the numeric value of the input \(W\), not just the size of the input (i.e., the number of bits required to represent \(W\)).
+When \(W\) grows exponentially with respect to its bit-length (e.g., \(W=2^n\)), the runtime becomes exponential in the input size---a hallmark of NP-hard problems.
+\end{itemize}
+
+\subsection{Optimizations and Their Inadequacies}
+
+Given the significant state space of DP, a key idea to overcome its limitations is to approximate the value function using neural networks. This approach, often termed as approximated or neural dynamic programming, has become an important research direction. For instance, \textbf{Yang et al. (2018)} and \textbf{Xu et al. (2020)} have proposed frameworks that replace the tabular representation in DP with neural networks, significantly reducing space complexity for problems like the TSP \cite{yangBoostingDynamicProgramming2018, xuDeepNeuralNetwork2020}. \textbf{Hertrich and Skutella (2023)} further provided theoretical analysis on the approximation quality for the KP using recurrent neural networks of bounded size \cite{hertrichProvablyGoodSolutions2023}. While these methods are powerful, they often require problem-specific designs. Other general optimizations for DP are as follows:
+
+\begin{itemize}
+    \item \textbf{Space Optimization:} The space complexity of the tabulation method can be optimized from \(O(nW)\) to \(O(W)\) by noticing that the calculation for row \(i\) only depends on the results from row \(i-1\).
+This can be achieved by using a one-dimensional array. However, this optimization comes at the cost of losing the ability to reconstruct the optimal item set without additional bookkeeping, as intermediate results are overwritten.
+Furthermore, the time complexity remains \(O(nW)\), which is still prohibitive.
+\item \textbf{Fully Polynomial-Time Approximation Scheme (FPTAS):} For the 0/1 Knapsack Problem, an FPTAS exists, which guarantees a solution with a value of at least \((1-\epsilon)\) times the optimal value.
+It works not by normalizing capacity, but by scaling and rounding the item \textit{values}.
+Given a desired approximation ratio \(\epsilon > 0\), the algorithm proceeds by setting a scaling factor \(K = (\epsilon v_{\max}) / n\), where \(v_{\max} = \max_{i} v_i\).
+Each item's value is then transformed to \(v'_i = \lfloor v_i / K \rfloor\).
+A standard DP algorithm is then run on these scaled, integer values.
+The time complexity of this approach is \(O(n^3/\epsilon)\), which is polynomial in both \(n\) and \(1/\epsilon\).
+Despite this, for the large-scale problems with many items addressed in this research, the computational cost can still be unacceptable.
+\end{itemize}
+
+\begin{table}[htbp]
+    \centering
+    \caption{Theoretical Complexity of Traditional Algorithms}
+    \label{tab:complexity_comparison}
+    \small
+    \begin{tabular}{@{}l l l p{5cm}@{}}
+        \toprule
+        \textbf{Algorithm} & \textbf{TC} & \textbf{SC} & \textbf{Notes} \\
+        \midrule
+        DP & $O(nC)$ & $O(C)$ & Exact. Pseudo-polynomial time complexity. \\
+        BnB & $O(2^n)$ & $O(n)$ & Exact. Exponential in the worst-case. \\
+        Greedy & $O(n \log n)$ & $O(n)$ & Approximation. Fast but suboptimal. \\
+        FPTAS & $O(n^3/\epsilon)$ & $O(n^2/\epsilon)$ & Approximation. Polynomial in $n$ and $1/\epsilon$. \\
+        \bottomrule
+    \end{tabular}
+
+    % Using a minipage to format the note below the table
+    \begin{minipage}{0.9\textwidth}
+        \vspace{2pt} % Adds a small space between the table and the note
+        \small % Use \small for the note, which is more readable than \tiny
+        \textbf{Note:} TC: Time Complexity, SC: Space Complexity. $n$: number of items, $C$: knapsack capacity, $\epsilon$: approximation ratio.
+    \end{minipage}
+\end{table}

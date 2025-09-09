@@ -1,0 +1,84 @@
+% ===================================================================
+% SECTION 5: CONCLUSION & FUTURE WORK
+% ===================================================================
+\section{Conclusion \& Future Work}
+
+% --- Slide 1: Conclusion ---
+\begin{frame}
+    \frametitle{Conclusion}
+
+    \begin{columns}[T]
+        % --- LEFT COLUMN: Performance Summary ---
+        \begin{column}{0.5\textwidth}
+            \begin{block}{Performance Summary}
+                \begin{itemize}
+                    \item \textbf{PPO vs. Pointer Network (Accuracy):} \\
+                    \begin{itemize}
+                        \item \textbf{Algorithmic Superiority:} PPO's Actor-Critic (TD) method provides low-variance updates.
+                        \item \textbf{Architectural Advantage:} The \textbf{Transformer} encoder captures the global, combinatorial nature of the problem more effectively than a sequential \textbf{LSTM}.
+                        \item \textbf{Framework Robustness:} Leveraging \textbf{Stable Baselines 3} provides key stabilizations like adaptive observation normalization (`VecNormalize`).
+                    \end{itemize} \vspace{1em}
+
+                    \item \textbf{PPO vs. Pointer Network (Speed):} \\
+                    \begin{itemize}
+                        \item \textbf{Core Architecture:} \textbf{Transformer} is more computationally intensive than \textbf{LSTM}.
+                        \item \textbf{Model Components:} Extra Critic Network requires extra computation.
+                        \item \textbf{Evaluation Method:} Stable\_baseline3 cannot support batch evaluation.
+                    \end{itemize} \vspace{1em}                    
+                \end{itemize}
+            \end{block}
+        \end{column}
+        
+        % --- RIGHT COLUMN: Key Methodological Takeaways ---
+        \begin{column}{0.5\textwidth}
+            \begin{alertblock}{Effective Training Techniques}
+                The success of the framework relies on several key techniques:
+                \begin{itemize}
+                    \item \textbf{Input Normalization:} \\
+                    Normalizing item attributes ($w_i, v_i$) and the knapsack capacity ($C$) is crucial. \vspace{1em}
+                    
+                    \item \textbf{Observation \& Reward Normalization:} \\
+                    Using `VecNormalize` for both observations and rewards stabilizes the learning process significantly. \vspace{1em}
+                    
+                    \item \textbf{Heuristic Preprocessing:} \\
+                    Sorting items by value-density ($v_i / w_i$) before feeding them to the model provides a strong inductive bias and improves performance.
+                \end{itemize}
+            \end{alertblock}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% --- Slide 2: Future Work ---
+\begin{frame}
+    \frametitle{Future Work \& Open Questions}
+
+    \begin{block}{Architectural Exploration}
+        \begin{itemize}
+            \item \textbf{The "Simple Critic" Anomaly:} \\
+            A simple MLP Critic achieved higher accuracy (70\%) than a more complex attention-based head (60\%). Future work should investigate if this is due to optimization challenges or a regularization effect. \vspace{1em}
+            
+            \item \textbf{Global State Representation (`[CLS]` Token):} \\
+            Initial experiments with a `[CLS]` token for global state representation surprisingly decreased performance. This warrants further investigation. \vspace{1em}
+            
+            \item \textbf{Hyperparameter Tuning:} \\
+            While a 3-layer MLP Critic works well, its optimal width and the interplay with network depth remain open questions for further tuning.
+        \end{itemize}
+    \end{block}
+
+    \begin{alertblock}{Problem Formulation \& Reward Shaping}
+        \begin{itemize}
+            \item \textbf{Explore Alternative Formulation:} Our model uses a \textbf{"Decision" formulation} (select one from all remaining items). An alternative \textbf{"Selection" formulation} (decide 'take' or 'skip' for items sequentially) could be investigated. \vspace{1em}
+
+            \item \textbf{Advanced Reward Shaping:} For the current "Decision" model, an initial attempt at adding a final shaping reward (to encourage a fuller knapsack) decreased accuracy. Further research into more advanced shaping techniques (e.g., potential-based rewards) is needed.
+        \end{itemize}
+    \end{alertblock}
+\end{frame}
+
+
+% --- Final Thank You Slide ---
+\begin{frame}
+    \centering
+    \Huge{\textbf{Thank You}}
+    \vspace{2em}
+    \LARGE{Q \& A}
+\end{frame}

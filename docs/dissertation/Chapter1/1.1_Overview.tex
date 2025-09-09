@@ -1,0 +1,12 @@
+% !TEX root = ../Dissertation.tex
+\section{Research Overview}
+
+This dissertation documents the development of an end-to-end reinforcement learning (RL) framework for solving the 0/1 Knapsack Problem (KP) with a primary focus on scalability and generalization. The research journey commenced with an empirical validation of classical optimization algorithms. Initial experiments with methods such as Dynamic Programming and Branch and Bound confirmed their well-documented theoretical limitations; they proved to be computationally infeasible for problems with large capacity constraints or a high number of items, suffering from excessive memory usage and exponential runtime complexity respectively.
+
+Following this, the investigation transitioned to machine learning paradigms. A preliminary exploration using a standard Multi-Layer Perceptron (MLP) architecture quickly revealed its inability to learn a generalizable solving policy, as evidenced by its poor performance on unseen problem sizes. To overcome the limitations of supervised learning, which relies on the availability of high-quality, optimal solution labels, this research pivoted towards reinforcement learning. The theoretical foundation for this shift is the inherent connection between dynamic programming and RL, as the DP recurrence for the Knapsack Problem can be viewed as a deterministic instance of the Bellman equation \cite{tamarValueIterationNetworks2017}.
+
+The initial RL approach was inspired by the seminal work of Bello et al. \cite{belloNeuralCombinatorialOptimization2017}, which utilized a Pointer Network with the REINFORCE algorithm. However, our replication and experimentation with this method highlighted significant training instability and high variance, which are common challenges associated with vanilla policy gradient methods. To address these shortcomings, this work proposes a substantially evolved framework.
+The final architecture combines a shared Transformer encoder for item inter-dependencies, a Pointer Network decoder (actor), and an MLP critic head.
+
+The training is stabilized and made more efficient by leveraging the Proximal Policy Optimization (PPO) algorithm \cite{schulmanProximalPolicyOptimization2017}. 
+This novel framework successfully learns a scalable policy, achieving a solution accuracy of approximately 70\% (equivalent to a Mean Relative Error below 30\%) on large-scale generalization tests.

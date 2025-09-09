@@ -1,0 +1,50 @@
+% !TEX root = ../Dissertation.tex
+
+\chapter{Conclusion and Future Work}
+\label{chap:conclusion_future_work}
+
+This dissertation confronted the challenge of creating a scalable and generalizable solver for the 0/1 Knapsack Problem, a canonical NP-complete challenge.
+This final chapter summarizes the key findings and contributions of this work and proposes promising directions for future research.
+
+\section{Conclusions}
+\label{sec:conclusions}
+
+The primary motivation for this research was to address a critical gap in existing learning-based solvers for combinatorial optimization: the failure to generalize to problem sizes unseen during training.
+Traditional exact algorithms, while optimal, are computationally infeasible for large-scale instances, and prior neural approaches were often confined to fixed problem dimensions.
+To overcome these limitations, we proposed and developed a novel, end-to-end deep reinforcement learning framework.
+The core of this framework is a sophisticated policy network built upon the Proximal Policy Optimization (PPO) algorithm.
+The architecture features a Transformer-based encoder to effectively capture the global, combinatorial relationships between items, a Pointer Network decoder to handle the dynamic action space of item selection, and a simple but effective MLP critic head for stable value estimation.
+Furthermore, our analysis revealed the critical impact of \textbf{training-inference skew}, where a deviation from the step-by-step state processing used in training led to a significant performance drop in a high-speed batched solver, highlighting the necessity of procedural consistency.
+The entire research pipeline, from data generation to comparative evaluation, was encapsulated in a reproducible software platform.
+
+The empirical results presented in Chapter 5 validate the success of our approach.
+Trained exclusively on small-scale instances with 5 to 50 items, the model demonstrated powerful generalization capabilities.
+When evaluated on large, unseen instances of up to 200 items, our framework achieved a stable Mean Relative Error (MRE) consistently below 30\% against optimal solutions from the Gurobi solver.
+Furthermore, while the Transformer architecture is computationally more intensive than simpler baselines, our model's inference time remains orders of magnitude faster than Gurobi on large instances, confirming its practical viability.
+
+In conclusion, this work successfully demonstrates that a carefully designed, PPO-based framework can learn a robust and scalable policy for the 0/1 Knapsack Problem.
+By integrating a Transformer encoder with a Pointer Network decoder and leveraging the stability of PPO, we have produced a solver that effectively bridges the gap between the performance of traditional methods and the scalability requirements of modern applications.
+
+\section{Future Work}
+\label{sec:future_work}
+
+The findings and limitations of this study open up several promising avenues for future research, many of which are informed by preliminary ablation studies conducted during this project that yielded counter-intuitive yet insightful results.
+
+\begin{itemize}
+    \item \textbf{Architectural Exploration:} Our experiments revealed several interesting architectural phenomena that warrant deeper, more systematic investigation.
+    \begin{itemize}
+        \item \textbf{The "Simple Critic" Anomaly:} In our tests, a simple MLP critic consistently outperformed a more complex, attention-based critic head (achieving approx. 70\% vs. 60\% accuracy). This counter-intuitive result suggests that for value estimation in this problem, simpler models may offer an implicit regularization effect or be easier to optimize. Future work should conduct a rigorous, wide-ranging comparison to determine the precise reasons for this performance gap.
+        \item \textbf{Global State Representation:} Our preliminary experiments showed that using a dedicated `[CLS]` token for global state representation, a common technique in many Transformer applications, surprisingly decreased performance compared to mean-pooling. A systematic study is needed to understand the most effective way to aggregate state information for this class of combinatorial optimization problem.
+    \end{itemize}
+
+    \item \textbf{Problem Formulation and Reward Design:} The fundamental problem setup could be explored further.
+    \begin{itemize}
+        \item \textbf{Alternative Formulations:} Our model uses a "Decision" formulation (selecting one item from all available candidates at each step). An alternative "Selection" formulation, where the agent makes a binary 'take' or 'skip' decision for each item in a pre-defined sequence, could be investigated to see how it impacts learning dynamics and final solution quality.
+        \item \textbf{Advanced Reward Shaping:} Our initial attempts at adding a final shaping reward based on the knapsack's fill rate were not successful, often leading to training instability or policy degradation. This suggests the agent is sensitive to dense, potentially misleading signals. Future research should explore more sophisticated techniques, such as potential-based reward shaping, which are theoretically guaranteed not to alter the optimal policy while potentially accelerating convergence.
+    \end{itemize}
+
+    \item \textbf{Framework and Implementation Enhancements:} There is significant potential to improve the framework's efficiency.
+    \begin{itemize}
+        \item \textbf{High-Performance Batch Solver:} As our investigation revealed in Section~\ref{sec:analysis_batch_solver}, a significant training-inference skew prevents the current model from performing accurately in a fast, batched-inference setting. The most critical future work is therefore to develop a solver that is both fast and accurate. This could be approached from two angles: either by designing a more sophisticated batch decoder that can efficiently perform partial state re-encoding at each step, or, more fundamentally, by altering the training paradigm itself. Training the model with a methodology that mirrors the efficient, one-time-encoding process of the fast solver would teach the policy to operate under those specific conditions, thereby eliminating the skew and unlocking its full potential for industrial-scale applications.
+    \end{itemize}
+\end{itemize}

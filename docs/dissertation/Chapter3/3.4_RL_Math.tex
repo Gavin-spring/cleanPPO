@@ -1,0 +1,82 @@
+% !TEX root = ../Dissertation.tex
+\subsection{From Bellman to PPO: An Evolutionary Trajectory}
+\label{sec:from-bellman-to-ppo}
+
+The transition from Dynamic Programming (DP) to modern reinforcement learning algorithms like Proximal Policy Optimization (PPO) is not arbitrary. It follows a coherent, problem-driven evolution rooted in the Bellman equation. This evolution can be understood as a sequence of adaptations, each designed to overcome a critical limitation of the previous approach to achieve the scalability, efficiency, and stability required for complex problems like the 0/1 Knapsack Problem.
+
+\subsubsection{The Foundational Bellman Equation}
+As established in Section~\ref{sec:dp}, the DP recurrence is a specific instance of the Bellman principle. The general, element-wise Bellman equation for the state-value function \(V^\pi(s)\) is:
+\begin{equation}
+    \label{eq:bellman_elementwise}
+    V_{\pi}(s) = \sum_{a \in A} \pi(a|s) \left[ \sum_{r \in R} p(r|s, a)r + \gamma \sum_{s' \in S} p(s'|s, a)V_{\pi}(s') \right]
+\end{equation}
+Here, the terms are defined as:
+\begin{itemize}
+    \item \(\pi(a|s)\) is the \textbf{policy}, defining the probability of taking action \(a\) in state \(s\).
+    \item \(p(s'|s, a)\) and \(p(r|s, a)\) together form the \textbf{model} of the environment, specifying the probabilities of transitioning to state \(s'\) and receiving reward \(r\), respectively.
+    \item \(\gamma\) is the \textbf{discount factor} (\(0 \le \gamma \le 1\)), which balances immediate and future rewards. Although the Knapsack Problem is theoretically an undiscounted, finite-horizon problem, our framework adopts \(\gamma = 0.99\). This choice aligns with standard practice in deep reinforcement learning, where a discount factor close to 1 is often used to stabilize training and reduce the variance of value estimates. The state transitions in the KP environment are also deterministic constants.\end{itemize}
+DP is a \textbf{model-based} approach because it requires full knowledge of the model (the transition and reward probabilities) to compute the value function. In contrast, most RL applications are \textbf{model-free}, learning a policy through trial-and-error without explicit knowledge of the environment's dynamics.
+
+\subsubsection{Step 1: Bellman to Value Function Approximation}
+\textbf{Limitation of DP:} A tabular representation of \(V(s)\) is intractable for large-scale problems due to exponential memory and computational requirements.
+
+\textbf{Adaptation:} Replace the exact, tabular value function with a \textit{learnable function approximator} \(V_\phi(s)\), typically a neural network with parameters \(\phi\). This allows generalization across states and enables application to high-dimensional state spaces.
+\[
+V^\pi(s) \quad \longrightarrow \quad V_\phi(s) \approx V^\pi(s)
+\]
+
+\subsubsection{Step 2: Value Approximation to Policy Gradient}
+\textbf{Limitation of Value-Based Methods:} Methods like DQN, which learn a value function and derive a policy indirectly (e.g., \(\pi(s) = \arg\max_a Q(s,a)\)), are ill-suited for the Knapsack Problem. The action space (the set of available items) is large, discrete, and dynamically changes at each step. Iterating through all possible actions to find the `argmax` is inefficient and does not scale. A more effective approach is to directly learn a stochastic policy that outputs a probability distribution over the available items.
+
+\textbf{Adaptation:} Directly parameterize the policy as \(\pi_\theta(a|s)\) and optimize its parameters \(\theta\) to maximize the expected return. This transition involves several layers of approximation:
+\begin{enumerate}
+    \item \textbf{Function Approximation:} The policy \(\pi\) is approximated by a neural network \(\pi_\theta\).
+    \item \textbf{Sampling Approximation:} The expectation \(\mathbb{E}_{\tau \sim \pi_\theta}[\cdot]\) over all possible trajectories is approximated by averaging over a finite batch of trajectories sampled from the current policy.
+    \item \textbf{Policy Gradient Theorem:} This provides a theoretical tool to compute the gradient of the expected return, enabling optimization via gradient ascent.
+\end{enumerate}
+The REINFORCE algorithm implements this via the policy gradient, using a Monte Carlo estimate of the expected return.
+
+\subsubsection{Step 3: Monte Carlo Estimation to Actor-Critic (TD)}
+\textbf{Limitation of Monte Carlo Estimation:} The REINFORCE algorithm uses the full cumulative return \(G_t = \sum_{k=t}^{T} \gamma^{k-t} R_{k+1}\) to update the policy. This Monte Carlo estimator, while unbiased, suffers from high variance because the return for an action at timestep \(t\) is affected by all subsequent rewards and stochastic decisions. This results in noisy gradient estimates and unstable learning.
+
+\textbf{Adaptation:} Replace the MC estimator with a lower-variance Temporal Difference (TD) estimator. TD learning updates an estimate based on an observed reward and another learned estimate (a process called bootstrapping). The TD error, \(\delta_t = R_{t+1} + \gamma V_\phi(s_{t+1}) - V_\phi(s_t)\), provides a less noisy, step-by-step learning signal. In the Actor-Critic framework, this principle is used to compute the \textit{advantage function}, \(\hat{A}_t\), which measures how much better an action is than the average expectation from that state.
+\[
+G_t \quad \longrightarrow \quad \hat{A}_t = R_{t+1} + \gamma V_\phi(s_{t+1}) - V_\phi(s_t)
+\]
+Using \(\hat{A}_t\) as the credit assignment signal in the policy gradient update reduces variance and enables more efficient and stable online learning.
+
+\subsubsection{Step 4: Actor-Critic to Proximal Policy Optimization (PPO)}
+\textbf{Limitation of standard Actor-Critic:} Unconstrained policy updates can still lead to catastrophic performance drops. A single bad mini-batch could result in an overly large gradient step, moving the policy to a poor region of the parameter space from which it cannot easily recover.
+
+\textbf{Adaptation:} PPO \cite{schulmanProximalPolicyOptimization2017} introduces a \textit{clipped surrogate objective} that limits the magnitude of policy change at each update, effectively creating a trust region.
+\[
+\mathcal{L}^{\text{CLIP}}(\theta) = \mathbb{E}_{t} \left[ \min\left( r_t(\theta) \hat{A}_t, \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon) \hat{A}_t \right) \right]
+\]
+where the probability ratio \(r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{\text{old}}}(a_t|s_t)}\) measures the policy change. The clipping mechanism prevents \(r_t(\theta)\) from deviating too far from 1, thereby penalizing large policy updates. This simple but effective stabilization allows PPO to achieve robust, high-performance learning, making it the algorithm of choice for this research.
+
+\subsubsection{Summary of the Evolutionary Path}
+The entire trajectory, driven by the need to address specific limitations at each stage, is summarized in Table~\ref{tab:evolution_path}.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Evolutionary Path from Dynamic Programming to PPO}
+    \label{tab:evolution_path}
+    \begin{tabularx}{\textwidth}{l >{\raggedright\arraybackslash}X}
+        \toprule
+        \textbf{Stage} & \textbf{Key Change from Previous Stage} \\
+        \midrule
+        \textbf{1. DP} & 
+        (Baseline) Solves problems using a complete, exact state-value table. \\
+
+        \textbf{2. Value-Based RL} & 
+        Replaces the exact table with a neural network (\textit{function approximator}) to handle large state spaces. \\
+
+        \textbf{3. Policy Gradient} & 
+        Directly parameterizes and optimizes the policy network, instead of learning values to infer a policy. \\
+
+        \textbf{4. Actor-Critic / PPO} & 
+        Uses a TD-based advantage estimate to replace high-variance Monte Carlo returns, and adds a clipping mechanism to stabilize training. \\
+        \bottomrule
+    \end{tabularx}
+\end{table}

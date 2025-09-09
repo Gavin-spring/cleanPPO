@@ -1,0 +1,51 @@
+# Initialize neural network f(s; θ), possibly with pre-training on edge cases
+initialize_network(f, θ)
+
+# Initialize the data pool D
+D = []
+
+# Initialize exploration parameter εt = 1.0 and learning rate ηt
+εt = 1.0
+ηt = initial_learning_rate
+
+# for each iteration t = 1, 2, ...
+for t in range(1, T):
+    # Initialize S, Q, V
+    S = []
+    Q = initialize_queue()
+    V = initialize_visit_marker()
+
+    # Add the initial state s0 to Q and V
+    s0 = get_initial_state()
+    Q.add(s0)
+    V.mark(s0)
+
+    # While Q is not empty
+    while not Q.is_empty():
+        s = Q.pop()
+        S.append(s)
+
+        # Select action a
+        if random() < εt:
+            a = select_random_action(s)
+        else:
+            a = select_action_using_equation_2(s)
+
+        # For each resulting sub-state
+        for s_prime in delta(s, a):
+            if not V.is_marked(s_prime):
+                Q.add(s_prime)
+                V.mark(s_prime)
+
+    # Generate a mini-batch B = S + Sample(D)
+    B = S + sample_from(D)
+
+    # Gradient descent step using equations (6) and (7)
+    gradient_step(B)
+
+    # Add S to D, weighted by solution value
+    D.extend(S, weight=solution_value(S))
+
+    # Decay εt and ηt if needed
+    εt = decay(εt)
+    ηt = decay(ηt)

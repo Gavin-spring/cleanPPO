@@ -1,0 +1,48 @@
+{
+    "run_name": "Exp26-ReplicateExp13-v2-seed42-20250810_014913",
+    "model_info": {
+        "model_description": "Shared Encoder + MLP",
+        "exp_description": "Exp26: Replicate Exp13, enrich rollout info",
+        "architecture": {
+            "critic_description": "MLP with bn and dropout",
+            "critic_type": "simple",
+            "critic_input_context": false,
+            "use_cls_token": false
+        }
+    },
+    "data_info": {
+        "data_range": "10~50",
+        "data_type": "unfixed",
+        "data_paths": {
+            "training": "/home/gavin/projects/Mine/data/small_training",
+            "validation": "/home/gavin/projects/Mine/data/small_validation"
+        }
+    },
+    "hyperparams": {
+        "use_shaping_reward": false,
+        "VecNormalize_obs": true,
+        "VecNormalize_reward": true,
+        "train_max_n": 50,
+        "eval_max_n": 500,
+        "n_glimpses": 2,
+        "embedding_dim": 128,
+        "nhead": 4,
+        "num_layers": 2,
+        "n_process_block_iters": 3
+    },
+    "params": {
+        "total_timesteps": 2500000,
+        "eval_freq": 2500,
+        "learning_rate_initial": 1e-05,
+        "learning_rate_final": 1e-06,
+        "n_steps": 4096,
+        "batch_size": 64,
+        "n_epochs": 10,
+        "gamma": 0.99,
+        "gae_lambda": 0.95,
+        "clip_range": 0.2,
+        "vf_coef": 1.0,
+        "entropy_coef": 0.01,
+        "max_grad_norm": 2.0
+    }
+}

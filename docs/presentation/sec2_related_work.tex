@@ -1,0 +1,53 @@
+\section{Related Work \& My Contributions}
+\begin{frame}
+    \frametitle{Knapsack Problem Solvers: A Comparative Overview}
+
+    % --- Combined Table: Exact + Approximate Algorithms ---
+    \begin{block}{1. Exact and Approximate Algorithms}
+        \footnotesize
+        \begin{tabularx}{\textwidth}{@{} l p{2.0cm} p{2.0cm} X @{}}
+        \toprule
+        \textbf{Algorithm} & \textbf{TC.} & \textbf{SC.} & \textbf{Limitations} \\
+        \midrule
+        Dynamic Programming & $O(n \cdot C)$ & $O(n \cdot C)$ & High memory usage; infeasible for large capacity $C$ \\
+        Branch \& Bound & $O(2^n)$ (worst-case) & $O(n^2)$ & Exponential runtime in worst case; performance depends on bounding quality \\
+        \midrule % Separator between exact and approximate
+        Greedy & $O(n \log n)$ & $O(n)$ & No performance guarantee; poor approximation in worst case \\
+        Genetic Algorithm & $O(G \cdot P \cdot n)$ & $O(P \cdot n)$ & Parameter-sensitive; may converge prematurely \\
+        Simulated Annealing & $O(\text{iter} \cdot n)$ & $O(n)$ & Slow convergence; sensitive to cooling schedule \\
+        \bottomrule
+        \end{tabularx}
+    \end{block}
+
+    \vspace{-0.8em}
+
+    % --- Modern Neural Network Approaches ---
+    \begin{alertblock}{2. Modern Neural Network Approaches (for Knapsack Problem)}
+        \footnotesize
+        \begin{tabularx}{\textwidth}{@{} l p{2.0cm} p{2.5cm} X @{}}
+        \toprule
+        \textbf{Work} & \textbf{Type \& Gen.} & \textbf{Architecture / Algorithm} & \textbf{Key Results (Accuracy / Speed)} \\
+        \midrule
+        Bello (2017) & C / Fixed & PtrNet / REINFORCE & Near-optimal on small scale; Faster than exact algorithms \\
+        Yildiz (2022) & C / Fixed & Transformer / DQN & $\sim$92.7\% accuracy; $\sim$40x faster than DP \\
+        Abid (2023) & C / Fixed & MLP / SL & Near-optimal but slower inference than heuristics \\
+        % Zhang (2025) & C / Fixed & Dueling DQN / RL & $\sim$98\% accuracy; $>$9000x faster than DP \\
+        Cappart (2021) & I / Yes & DRL + CP Solver & Proves optimality; Outperforms standalone RL/CP \\
+        \bottomrule
+        \end{tabularx}
+    \end{alertblock}
+
+    \vspace{-1em}
+    \vfill
+
+    % --- Note with your contribution ---
+    \tiny
+    \textbf{Note:} TC. = Time Complexity, SC. = Space Complexity.  
+    $n$: number of items, $C$: knapsack capacity, $G$: generations, $P$: population size, $\text{iter}$: iterations.  
+    \textbf{C} = Constructive; \textbf{I} = Improvement; \textbf{Gen.} = Generalization.  
+    PtrNet = Pointer Network; MLP = Multi-Layer Perceptron; SL = Supervised Learning; CP = Constraint Programming.
+
+    \medskip
+
+    \textbf{My Contribution:} A generalizable RL framework that solves knapsack problems of arbitrary size (train on $N$, test on $>N$) with ~70\% accuracy using PPO, enabling scalable and robust decision-making.
+\end{frame}

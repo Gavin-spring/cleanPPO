@@ -1,0 +1,77 @@
+\documentclass[pdftex,10pt,a4paper,oneside]{report}
+
+\usepackage{amsmath}
+\usepackage{amssymb} 
+% \usepackage{algorithm}
+% \usepackage{algorithmic}
+\usepackage{svg}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{lipsum}
+\usepackage{multirow}
+\usepackage{setspace}
+\usepackage{verbatim}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{array}
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\usepackage{float}
+\usepackage{pbox}
+
+\usepackage[
+    hidelinks,
+    colorlinks=true,
+    linkcolor=black,    % 章节链接颜色
+    citecolor=blue,     % 引用颜色
+    urlcolor=blue       % URL 颜色
+]{hyperref}
+
+\fancyhf{}
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0.2pt}
+\renewcommand{\bibname}{References}
+
+% Styles can be Sonny, Lenny, Glenn, Conny, Rejne, Bjarne and Bjornstrup
+\usepackage[Sonny]{fncychap}
+
+\begin{document}
+
+\include{Preamble/Frontpage}
+\include{Preamble/Abstract}
+% \include{Preamble/Dedication} % Comment out for UG dissertations
+\include{Preamble/Acknowledge}
+\include{Preamble/Declarations} % Comment out for UG dissertations
+% \include{Preamble/Sponsors} % Comment out for UG dissertations
+\include{Preamble/Abbreviations}
+%\include{Preamble/Notations} % Comment out for most dissertations 
+\include{Preamble/Contents}
+\include{Preamble/Lists}
+\include{Preamble/ChapterMods}
+
+
+% \chapter{Introduction}
+\include{Chapter1/C1_Introduction}
+
+% \chapter{Related Work}
+\include{Chapter2/C2_Related_Work}
+
+% \chapter{Background}
+\include{Chapter3/C3_Background}
+
+% \chapter{Methodology}
+\include{Chapter4/C4_Methodology}
+
+% \chapter{Experiments and Results}
+\include{Chapter5/C5_Experiments}
+
+% \chapter{Conclusion and Future Work}
+\include{Chapter6/C6_Conclusions}
+
+\bibliographystyle{abbrv}
+\bibliography{bibliography}
+
+\include{Appendices/Appendices}
+
+\end{document}

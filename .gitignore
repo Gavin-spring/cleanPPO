@@ -1,0 +1,83 @@
+# Deperated files
+misc/
+data_old/
+.deprecated/
+*deprecated*
+
+# backup
+*backup/
+back_diff/
+*.zip
+
+# data
+data/
+*.csv
+data/**/*.csv
+
+# Python Caches
+__pycache__/
+.pytest_cache/
+*.pyc
+*.pyo
+*.pyd
+
+# Generated output files
+# plots/
+*.log
+*training_log_*.log
+
+# VSCode specific
+.vscode/
+
+# Virtual environment
+venv/
+*.env
+.venv/
+
+# Tool scripts
+tools/
+tools
+
+# Build and distribution artifacts
+*.egg-info/
+build/
+dist/
+artifacts/
+artifacts_sb3/
+
+# Dissertation latex code
+docs/dissertation/out
+docs/presentation/figures
+docs/presentation/mermaid
+docs/presentation/out
+docs/**/*.DS_Store
+docs/**/*.pptx
+docs/**/*.md
+docs/**/*.pseudo
+docs/*/*.aux
+docs/**/*.bbl
+docs/**/*.blg
+docs/**/*.log
+docs/**/*.out
+docs/**/*.toc
+docs/**/*.lof
+docs/**/*.lot
+docs/**/*.fls
+docs/**/*.fdb_latexmk
+docs/**/*.synctex.gz
+docs/**/*.png
+docs/**/*.jpg
+docs/**/*.jpeg
+docs/**/*.svg
+docs/**/*.drawio
+docs/**/svg*/
+docs/**/figures
+
+# vlab
+ngrok
+ngrok-v3-stable-linux-amd64.zip
+.ipynb_checkpoints/
+*vlab*.*
+*.Identifier
+*.pptx
+*.pptx

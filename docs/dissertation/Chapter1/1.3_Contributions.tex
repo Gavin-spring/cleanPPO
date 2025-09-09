@@ -1,0 +1,13 @@
+% !TEX root = ../Dissertation.tex
+\section{Contributions}
+
+This dissertation presents a series of contributions to the field of applying deep reinforcement learning to combinatorial optimization problems. The primary contributions are summarized as follows:
+
+\begin{itemize}
+    \item \textbf{A Novel, Generalizable RL Framework for the 0/1 Knapsack Problem:} We propose and validate an end-to-end deep reinforcement learning framework built upon the Proximal Policy Optimization (PPO) algorithm \cite{schulmanProximalPolicyOptimization2017}. The architecture's core, a shared Transformer encoder \cite{koolAttentionLearnSolve2019a} paired with a Pointer Network decoder \cite{belloNeuralCombinatorialOptimization2017} and an MLP critic, is specifically designed to learn the underlying structure of the KP, enabling it to scale effectively.
+
+    \item \textbf{Empirical Demonstration of Scalable Generalization:} A key contribution is the rigorous empirical evidence that our model learns a genuine, scalable solving policy rather than merely memorizing solutions for fixed-size problems. Trained exclusively on small-scale instances (5 to 50 items), the model demonstrates strong generalization to large, unseen instances (up to 200 items), maintaining a stable and low Mean Relative Error below 30\% when compared to the optimal solutions provided by the Gurobi solver. This capability marks a significant advancement over prior neural approaches that were limited to fixed problem dimensions.
+
+    \item \textbf{A Comprehensive and Reproducible Software Platform:} The entire framework has been implemented as a robust and reusable Python package. By leveraging well-regarded libraries such as Gymnasium and Stable Baselines 3, this work provides a comprehensive platform for the entire research pipeline, including procedural data generation, model training, and the comparative evaluation of RL agents against both traditional algorithms and commercial solvers. This platform serves as a valuable tool for ensuring reproducibility and fostering further research in the domain.
+\end{itemize}
+\looseness=-2

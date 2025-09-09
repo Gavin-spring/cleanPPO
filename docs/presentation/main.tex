@@ -1,0 +1,67 @@
+\documentclass[aspectratio=16 9, 8pt]{beamer}
+\usepackage[T1]{fontenc} % Add this line for modern font encoding
+\usepackage{lmodern}
+\usepackage{graphicx}
+\graphicspath{{figures/}} 
+\usepackage{epstopdf}
+\usepackage{booktabs}
+\usepackage{multicol}
+\usepackage{subfig}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{caption}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{tabularx}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usetikzlibrary{arrows, positioning}
+
+% \usetheme{Boadilla}
+\usetheme{Berlin}
+\setbeamertemplate{headline}{} % 移除页眉（顶部导航栏）
+\setbeamertemplate{footline}{} % 移除页脚（底部信息栏）
+\setbeamerfont{frametitle}{size=\large}
+
+% --- Configuration for the caption ---
+\captionsetup{justification=raggedright, singlelinecheck=false} % Set caption to be left-aligned
+\setbeamertemplate{caption}{\scriptsize\insertcaptionname~\insertcaptionnumber: \insertcaption} % Set caption font size
+
+\title{End-to-End PPO-Based Reinforcement Learning Framework for Scalable 0/1 Knapsack Problem Solving}
+\subtitle{From Data Generation to Large-Scale Generalization}
+\institute{\small\textbf{University of Birmingham}}
+\author{\texorpdfstring{Gang Lin \newline \texttt{Student ID: 2874886}}{Gang Lin (Student ID: 2874886)}}
+\date{19/08/2025}
+
+\begin{document}
+\AtBeginSection[]
+{
+ \begin{frame}
+ \frametitle{Chapters}
+ \begin{multicols}{2}
+  \tableofcontents[currentsection]
+ \end{multicols}
+ \end{frame}
+}
+\begin{frame}
+    \titlepage
+\end{frame}
+\begin{frame}{Contents}
+\begin{multicols}{2}
+    \tableofcontents[hideallsubsections]
+\end{multicols}
+\end{frame}    
+
+% --- Document Body ---
+\input{sec1_introduction.tex}
+\input{sec2_related_work.tex}
+\input{sec3_methodology.tex}
+\input{sec4_experiments.tex}
+\input{sec5_conclusion.tex}
+
+
+\end{document}

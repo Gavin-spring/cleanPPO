@@ -1,0 +1,25 @@
+
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+The 0/1 Knapsack Problem (KP) is a canonical NP-complete combinatorial optimization challenge with wide-ranging applications.
+While traditional exact algorithms like Dynamic Programming are computationally infeasible for large-scale instances due to exponential time or memory complexity, \
+ recent deep learning approaches often struggle with generalization to problem sizes unseen during training.
+This paper addresses this scalability challenge by proposing a novel, end-to-end reinforcement learning (RL) framework designed for high-performance generalization.
+
+We present a solution based on the Proximal Policy Optimization (PPO) algorithm, employing a sophisticated model architecture that \
+features a shared Transformer encoder to capture the global, combinatorial relationships between items, an actor head with a Pointer Network-based decoder for item selection, \
+ and a separate Multi-Layer Perceptron (MLP) critic head for stable value estimation.
+This entire workflow is encapsulated in a reusable Python package, which handles data generation, preprocessing, model training, and comparative evaluation against various benchmarks.
+
+Trained exclusively on small-scale KP instances with 5 to 50 items, our model demonstrates powerful generalization capabilities.
+When tested on large-scale instances of up to 200 items, the framework achieves a stable Mean Relative Error (MRE) below 30\% against optimal solutions derived from the Gurobi solver.
+Experimental results confirm that our approach significantly outperforms baseline neural architectures, including pure MLPs and earlier Pointer Network models, \
+ in terms of solution quality and exhibits greater training stability than the REINFORCE algorithm.
+This work validates the effectiveness of a PPO-based framework for solving combinatorial optimization problems, \
+ presenting a robust and scalable method that bridges the gap between traditional solvers and modern neural networks.
+
+\vspace{1em}
+% \begin{quotation}
+\noindent\small\textbf{Keywords:} 0/1 Knapsack Problem, Reinforcement Learning, Proximal Policy Optimization (PPO), Generalization, Transformer, Pointer Network
+% \end{quotation}

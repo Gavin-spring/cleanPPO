@@ -1,0 +1,26 @@
+# .gitattributes
+# This file is used to define attributes for paths in the repository.
+
+
+* text=auto
+*.py text
+*.md text
+*.txt text
+*.json text
+*.xml text
+*.html text
+*.css text
+*.js text
+*.gitignore text
+*.gitattributes text
+
+*.ipynb text eol=lf
+*.py eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
